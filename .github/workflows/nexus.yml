@@ -52,7 +52,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
           tags: ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.7.1
           push: true
 
