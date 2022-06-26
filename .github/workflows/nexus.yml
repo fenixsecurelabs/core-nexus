@@ -58,6 +58,11 @@ jobs:
       # Sign image with cosign
       - name: Sign image
         shell: bash
-        run: cosign sign -a commit=${{ github.sha }} --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.7.1-${{ github.run_id }}
+        run: |
+          cosign sign -a commit=${{ github.sha }} \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${ github.workflow }}" \
+            --key env://COSIGN_PRIVATE_KEY \
+            ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.7.1-${{ github.run_id }}
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
