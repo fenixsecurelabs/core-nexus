@@ -61,9 +61,3 @@ jobs:
         run: cosign sign -a commit=${{ github.sha }} --key env://COSIGN_PRIVATE_KEY ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.7.1-${{ github.run_id }}
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
-          
-      - name: Sign the images with GitHub OIDC Token **not production ready**
-        run: cosign sign ${TAGS}
-        env:
-          TAGS: ${{ steps.docker_meta.outputs.tags }}
-          COSIGN_EXPERIMENTAL: true
