@@ -63,7 +63,5 @@ jobs:
 
       # Sign image with cosign
       - name: Sign image
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         shell: bash
         run: cosign sign -a commit=${{ github.sha }} --key cosign.key ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.7.1-${{ github.run_id }}
