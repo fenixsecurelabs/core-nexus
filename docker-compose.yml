@@ -39,8 +39,8 @@ services:
 
 networks:
   Inner-Athena:
-    external:
-      name: Inner-Athena
+    name: Inner-Athena
 
 volumes:
   pihole_dns_data:
+    external: true

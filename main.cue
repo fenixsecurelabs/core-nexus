@@ -11,15 +11,45 @@ dagger.#Plan & {
 
 	client: filesystem: ".": read: contents: dagger.#FS
 
+	client: env: {
+		//                       REGISTRY_GITLAB_USER:   string | "_token_"
+		//                       REGISTRY_GITLAB_PASS:   dagger.#Secret
+		REGISTRY_DOCKERIO_PASS: dagger.#Secret
+	}
+
 	actions: {
 		build: docker.#Dockerfile & {
 			source: client.filesystem.".".read.contents
+			dockerfile: path: "Dockerfile"
+			auth: {
+				"index.docker.io": {
+					username: "pyrrhus"
+					secret:   client.env.REGISTRY_DOCKERIO_PASS
+				}
+				//    "registry.gitlab.com": {
+				//     username: client.env.REGISTRY_GITLAB_USER
+				//     secret:   client.env.REGISTRY_GITLAB_PASS
+				//    }
+			}
 		}
 
 		load: cli.#Load & {
 			image: build.output
 			host:  client.network."unix:///var/run/docker.sock".connect
-			tag:   "nexus0:v0.7.1"
+			tag:   "nexus0:v0.8.0"
+		}
+
+		push: {
+			_op: docker.#Push & {
+				image: build.output
+				dest:  "pyrrhus/nexus0:v0.8.0"
+			}
+			digest: _op.result
+			path:   _op.image.config.env.PATH
+			//        auth: {
+			//         username: "pyrrhus"
+			//         secret:   client.env.REGISTRY_DOCKERIO_PASS
+			//        }
 		}
 	}
 }
