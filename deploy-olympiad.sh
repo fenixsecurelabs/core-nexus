@@ -11,7 +11,7 @@ export WORKBENCH_WEBTOP_IMAGE=pyrrhus/webtop-workbench:amd64-latest
 export SOC_WEBTOP_IMAGE=pyrrhus/soc-admin-webtop:amd64-latest
 
 echo "Creating volumes for persistence..."
-docker volume create pihold_dns_data && \
+docker volume create pihole_dns_data && \
     docker volume create portainer_data
 
 echo "Pull necessary images"
