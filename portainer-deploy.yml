@@ -3,10 +3,10 @@ version: '3.2'
 services:
   portainer:
     container_name: Olympiad0
-    image: portainer/portainer-ce:2.11.1
+    image: portainer/portainer-ce:2.14.0
     ports:
       - "9443:9443"
-      - "9000:9000"
+#      - "9000:9000"
       - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
