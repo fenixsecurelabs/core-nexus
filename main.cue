@@ -36,13 +36,13 @@ dagger.#Plan & {
 		load: cli.#Load & {
 			image: build.output
 			host:  client.network."unix:///var/run/docker.sock".connect
-			tag:   "nexus0:v0.8.0"
+			tag:   "nexus0:v0.9.0"
 		}
 
 		push: {
 			_op: docker.#Push & {
 				image: build.output
-				dest:  "pyrrhus/nexus0:v0.8.0"
+				dest:  "pyrrhus/nexus0:v0.9.0"
 			}
 			digest: _op.result
 			path:   _op.image.config.env.PATH

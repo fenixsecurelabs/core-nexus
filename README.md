@@ -1,10 +1,30 @@
 ### Underground Nexus deployment
 > Current version 0.8.0
 
+**Resources**
+1. PI-Hole DNS - Obtain the IP address of your running docker container. `docker inspect Underground-Nexus`
+2. Linux webtop desktop - Alpine KDE - `http://localhost:3000` (optionally)
+3. Linux webtop desktop - Ubuntu MATE - `http://localhost:1000`
+4. Kali Linux Bleeding Edge Repository
+5. Portainer CE that sits behind NGINX Reverse Proxy
+
 **Features that are missing:**
 
-1. Minio is not being used right now because Minio has a conflicting port 9000 with Portainer. Future plan to redirect port usage or take away port 9000 on Portainer
+UPDATE: 
+  - Minio has been added back again, and the port has been fixed.
+  - There is a bash script now, and I took away the workbench.sh script for now.
+  - Docker Swarm is initialized last at the end of the script.
+
+1. Minio is not being used right now because Minio has a conflicting port 9000 with Portainer. Future plan to redirect port usage or take away port 9000 on Portainer.
 2. There isn't the best bash script to check for logic on when there are certain resources that are already available. A cli tool is coming soon.
+3. Docker Swarm is not initialized first only because of the conflict that Portainer has while being deployed along with Docker Swarm turned on.
+
+**ROADMAP**
+
+1. Before, I generated `cosign` key and `cosign` public key, now it has been changed to use GitHub support. There is no local private key to verify. At this time, signing and verification is done with GitHub OIDC login.
+2. Build an arm64 version of Underground Nexus.
+3. Dagger plan is using `docker#Push`, looking for a better way to implement this steps through Github Actions.
+4. So far, docker images are being built and pushed to DockerHub registry. Future plan is create an in-house self-hosted registry.
 
 **Information**
 
@@ -30,7 +50,7 @@ docker run -itd --name=Underground-Nexus \
     -p 1000:1000 -p 9050:9443 \
     -v underground-nexus-docker-socket:/var/run \
     -v underground-nexus-data:/var/lib/docker/volumes \
-    -v nexus-bucket:/nexus-bucket nexus0:v0.8.0
+    -v nexus-bucket:/nexus-bucket pyrrhus/nexus0:latest
 ```
 
 Execute the `deploy-olympiad.sh` script
@@ -51,12 +71,12 @@ v8gRvhT0mhF8anj95LSFVoSSfptc/oOQGVk4m+B24aCmYURIDCyaI8i6Kw==
 To verify the signed image with the about Cosign public key. You can also download `crane` to display the signed digest. It is also verifiable on my Dockerhub page.
 
 ```bash
-docker pull pyrrhus/nexus0:v0.7.1-2564787928
+docker pull pyrrhus/nexus0:latest
 
-cosign triangulate pyrrhus/nexus0:v0.7.1-2564787928
-index.docker.io/pyrrhus/nexus0:sha256-364f0ac6703714341daeb162325414e88117c1665e749fecad3cb6324f122d65.sig
+cosign triangulate pyrrhus/nexus0:latest
+index.docker.io/pyrrhus/nexus0:sha256-2370cc6b72bbeb73eab1f2edf3e22a5e30c785877b82a5d2ea79302742243927.sig
 
-crane manifest $(cosign triangulate pyrrhus/nexus0:v0.7.1-2564787928) | jq .
+crane manifest $(cosign triangulate pyrrhus/nexus0:latest) | jq .
 
 {
   "schemaVersion": 2,
@@ -64,27 +84,27 @@ crane manifest $(cosign triangulate pyrrhus/nexus0:v0.7.1-2564787928) | jq .
   "config": {
     "mediaType": "application/vnd.oci.image.config.v1+json",
     "size": 233,
-    "digest": "sha256:2c7c04129ad044a5b37f2231fd3e427331efdb27fad92b2b0e06ecea10a88d5d"
+    "digest": "sha256:342957a565a3133b864b091291dca2778d9f2735c2fc31404937cf1076b029a7"
   },
   "layers": [
     {
       "mediaType": "application/vnd.dev.cosign.simplesigning.v1+json",
-      "size": 366,
-      "digest": "sha256:bbaf460c4327955cd11e1477f9ae55f05347e890da54f10bba18f290ad4e66ec",
+      "size": 319,
+      "digest": "sha256:863fd2246616b5842ec6dfaefa40ba91acb5627d4d1a0e16e136f75f5e25eaa6",
       "annotations": {
-        "dev.cosignproject.cosign/signature": "MEQCIGrURDaQ3YjsNu/WIoD8amgdlPNwVccuzUlRtY+ZF9yZAiBvJIOjCxvSValG43YrecTvHEA3RUVoPy8iv/+e8HM9fw=="
+        "dev.cosignproject.cosign/signature": "MEQCIDnIHpAtsWKlc4Tlu0aCK8d/8jyF0nUZjPfaGbSwwZJqAiAteCPKYuG4na8KktWj48CxEMjKdSleIQS0NzKDAsO5CA=="
       }
     }
   ]
 }
 
-cosign verify --check-claims=false --key cosign.pub pyrrhus/nexus0:v0.7.1-2564787928
+cosign verify --key cosign.pub pyrrhus/nexus0:latest
 
-Verification for index.docker.io/pyrrhus/nexus0:v0.7.1-2564787928 --
+Verification for index.docker.io/pyrrhus/nexus0:latest --
 The following checks were performed on each of these signatures:
   - The signatures were verified against the specified public key
 
-[{"critical":{"identity":{"docker-reference":"index.docker.io/pyrrhus/nexus0"},"image":{"docker-manifest-digest":"sha256:364f0ac6703714341daeb162325414e88117c1665e749fecad3cb6324f122d65"},"type":"cosign container image signature"},"optional":{"commit":"32967e0c1c3f21cd22bcbae29e8b18391136917c","repo":"acald-creator/underground-nexus-deployment","workflow":"nexus"}}]
+[{"critical":{"identity":{"docker-reference":"index.docker.io/pyrrhus/nexus0"},"image":{"docker-manifest-digest":"sha256:2370cc6b72bbeb73eab1f2edf3e22a5e30c785877b82a5d2ea79302742243927"},"type":"cosign container image signature"},"optional":{"commit":"fbc8d91acd7fac6a70a46d71d88b15b8550fe2d8","repo":"pyrrhus/nexus0"}}]
 ```
 
 ***Experimental***
@@ -105,74 +125,50 @@ docker run --runtime=sysbox-runc \
 Using `syft` to package the newly built docker image.
 
 ```bash
-syft packages pyrrhus/nexus0:v0.7.1-2564787928 -o spdx > nexus0-latest.spdx
+syft packages pyrrhus/nexus0:latest -o spdx > nexus0-dind-latest.spdx
 
 # Cosign attach sbom to first docker built image
-cosign attach sbom --sbom nexus0-latest.spdx pyrrhus/nexus0:v0.7.1
-WARNING: Attaching SBOMs this way does not sign them. If you want to sign them, use 'cosign attest -predicate nexus0-latest.spdx -key <key path>' or 'cosign sign -key <key path> <sbom image>'.
-Uploading SBOM file for [index.docker.io/pyrrhus/nexus0:v0.7.1] to [index.docker.io/pyrrhus/nexus0:sha256-72c8a646cda55e78f7eeccea923ae32ae03aeeac46b88fc82b2c52131f975c47.sbom] with mediaType [text/spdx].
+cosign attach sbom --sbom nexus0-dind-latest.spdx pyrrhus/nexus0:latest
+WARNING: Attaching SBOMs this way does not sign them. If you want to sign them, use 'cosign attest -predicate nexus0-dind-latest.spdx -key <key path>' or 'cosign sign -key <key path> <sbom image>'.
+Uploading SBOM file for [index.docker.io/pyrrhus/nexus0:latest] to [index.docker.io/pyrrhus/nexus0:sha256-2370cc6b72bbeb73eab1f2edf3e22a5e30c785877b82a5d2ea79302742243927.sbom] with mediaType [text/spdx].
 
 # Cosign sign sbom
-cosign sign --key cosign.key index.docker.io/pyrrhus/nexus0:sha256-72c8a646cda55e78f7eeccea923ae32ae03aeeac46b88fc82b2c52131f975c47.sbom
+cosign sign --key cosign.key index.docker.io/pyrrhus/nexus0:sha256-2370cc6b72bbeb73eab1f2edf3e22a5e30c785877b82a5d2ea79302742243927.sbom
 Enter password for private key: 
 Pushing signature to: index.docker.io/pyrrhus/nexus0
 
 # Cosign verify
-cosign verify --key cosign.pub index.docker.io/pyrrhus/nexus0:sha256-72c8a646cda55e78f7eeccea923ae32ae03aeeac46b88fc82b2c52131f975c47.sbom
+cosign verify --key cosign.pub index.docker.io/pyrrhus/nexus0:sha256-2370cc6b72bbeb73eab1f2edf3e22a5e30c785877b82a5d2ea79302742243927.sbom
 
-Verification for index.docker.io/pyrrhus/nexus0:sha256-72c8a646cda55e78f7eeccea923ae32ae03aeeac46b88fc82b2c52131f975c47.sbom --
+Verification for index.docker.io/pyrrhus/nexus0:sha256-2370cc6b72bbeb73eab1f2edf3e22a5e30c785877b82a5d2ea79302742243927.sbom --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - The signatures were verified against the specified public key
 
-[{"critical":{"identity":{"docker-reference":"index.docker.io/pyrrhus/nexus0"},"image":{"docker-manifest-digest":"sha256:5374b94778798a21f482c1b98486ac076fd1d1193fb25de6c0b89c9c4a1bf306"},"type":"cosign container image signature"},"optional":null}]
+[{"critical":{"identity":{"docker-reference":"index.docker.io/pyrrhus/nexus0"},"image":{"docker-manifest-digest":"sha256:fb55e6584d0c079eac55b4f58bb50809bc4438e31611715f0fac6579f764e0cf"},"type":"cosign container image signature"},"optional":null}]
 ```
 
 You can also use `grype` to scan the new docker image.
 
 ```bash
-grype pyrrhus/nexus0:v0.7.1 --add-cpes-if-none                                                              
- ✔ Vulnerability DB        [no update available]
+grype pyrrhus/nexus0:latest --add-cpes-if-none     
+ ✔ Vulnerability DB        [updated]
  ✔ Loaded image            
  ✔ Parsed image            
- ✔ Cataloged packages      [355 packages]
- ✔ Scanned image           [61 vulnerabilities]
-NAME                                 INSTALLED  FIXED-IN    TYPE       VULNERABILITY        SEVERITY 
-docker                               5.0.3                  python     CVE-2021-21285       Medium    
-docker                               5.0.3                  python     CVE-2018-10892       Medium    
-docker                               5.0.3                  python     CVE-2019-16884       High      
-docker                               5.0.3                  python     CVE-2020-27534       Medium    
-docker                               5.0.3                  python     CVE-2019-5736        High      
-docker                               5.0.3                  python     CVE-2019-13509       High      
-docker                               5.0.3                  python     CVE-2019-13139       High      
-docker                               5.0.3                  python     CVE-2021-21284       Medium    
-github.com/containerd/containerd     (devel)    1.3.9       go-module  GHSA-36xw-fx78-c5r4  Medium    
-github.com/containerd/containerd     (devel)    1.5.13      go-module  GHSA-5ffw-gxpp-mxpf  Medium    
-github.com/containerd/containerd     (devel)    1.2.14      go-module  GHSA-742w-89gc-8m9c  Medium    
-github.com/containerd/containerd     (devel)    1.4.8       go-module  GHSA-c72p-9xmj-rx3w  Medium    
-github.com/containerd/containerd     (devel)    1.4.11      go-module  GHSA-c2h3-6mxw-7mvq  Medium    
-github.com/containerd/containerd     (devel)    1.4.13      go-module  GHSA-crp2-qrr5-8pq7  High      
-github.com/containerd/containerd     (devel)    1.4.12      go-module  GHSA-5j5w-g665-5m35  Low       
-github.com/containerd/imgcrypt       v1.1.1                 go-module  CVE-2022-24778       High      
-github.com/containerd/imgcrypt       v1.1.1     1.1.4       go-module  GHSA-8v99-48m9-c8pm  High      
-github.com/opencontainers/runc       (devel)    1.0.0-rc9   go-module  GHSA-fgv8-vj5c-2ppq  High      
-github.com/opencontainers/runc       (devel)    1.0.0-rc91  go-module  GHSA-g54h-m393-cpwq  Low       
-github.com/opencontainers/runc       v1.0.2     1.0.3       go-module  GHSA-v95c-p5hm-xq8f  Medium    
-github.com/opencontainers/runc       (devel)    1.0.0-rc95  go-module  GHSA-c3xm-pvg7-gh7r  High      
-github.com/opencontainers/runc       (devel)    1.0.3       go-module  GHSA-v95c-p5hm-xq8f  Medium    
-github.com/opencontainers/runc       (devel)    1.0.0-rc3   go-module  GHSA-gp4j-w3vj-7299  Medium    
-github.com/opencontainers/runc       v1.0.2     1.1.2       go-module  GHSA-f3fp-gc8g-vw66  Medium    
-github.com/opencontainers/runc       (devel)    1.1.2       go-module  GHSA-f3fp-gc8g-vw66  Medium    
-github.com/opencontainers/runc       (devel)    0.1.0       go-module  GHSA-q3j5-32m5-58c2  High      
-github.com/prometheus/client_golang  v1.7.1                 go-module  CVE-2022-21698       High      
-google.golang.org/protobuf           v1.27.1                go-module  CVE-2021-22570       High      
-google.golang.org/protobuf           v1.27.1                go-module  CVE-2015-5237        High      
-paramiko                             2.7.2                  python     CVE-2022-24302       Medium    
-paramiko                             2.7.2      2.10.1      python     GHSA-f8q4-jwww-x3wv  Medium
+ ✔ Cataloged packages      [377 packages]
+ ✔ Scanned image           [14 vulnerabilities]
+
+NAME                              INSTALLED  FIXED-IN  TYPE       VULNERABILITY        SEVERITY 
+docker                            5.0.3                python     CVE-2019-13139       High      
+docker                            5.0.3                python     CVE-2020-27534       Medium    
+docker                            5.0.3                python     CVE-2018-10892       Medium    
+docker                            5.0.3                python     CVE-2019-13509       High      
+docker                            5.0.3                python     CVE-2019-5736        High      
+docker                            5.0.3                python     CVE-2021-21284       Medium    
+docker                            5.0.3                python     CVE-2021-21285       Medium    
+docker                            5.0.3                python     CVE-2019-16884       High      
+github.com/containerd/containerd  v1.6.1     1.6.6     go-module  GHSA-5ffw-gxpp-mxpf  Medium    
+github.com/opencontainers/runc    v1.1.0     1.1.2     go-module  GHSA-f3fp-gc8g-vw66  Medium    
+google.golang.org/protobuf        v1.27.1              go-module  CVE-2015-5237        High      
+google.golang.org/protobuf        v1.27.1              go-module  CVE-2021-22570       High 
 ```
-
-**ROADMAP**
-
-1. Re-establish usage of Cosign generated private key onto a KMS service or Kubernetes
-2. Build arm64 version for Raspberry PI
-3. Dagger plan needs to include docker#Push to publish the newly built docker image to a container registry
