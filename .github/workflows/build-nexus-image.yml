@@ -33,38 +33,34 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-#       Build Docker image with dagger
-#      - name: Dagger
-#        uses: dagger/dagger-for-github@v3
-#        with:
-#          install-only: true
-#      - name: Show Dagger version
-#        run: dagger version
-#      - name: Build docker image
-#        uses: dagger/dagger-for-github@v3
-#        with:
-#          cmds: |
-#            project update
-#            do build
-#            do load
-
-      - name: Build and push
-        uses: docker/build-push-action@v3
+          
+      # Build Docker image with dagger
+      - name: Dagger
+        uses: dagger/dagger-for-github@v3
         with:
-          context: .
-          file: Dockerfile
-          tags: ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.8.0-${{ github.run_id }}
-          push: true
+          install-only: true
+      - name: Show Dagger version
+        run: dagger version
+      - name: Build docker image
+        uses: dagger/dagger-for-github@v3
+        with:
+          cmds: |
+            project update
+            do --plan build-dind.cue versions
 
       # Sign image with cosign
       - name: Sign image
         shell: bash
         run: |
           cosign sign -a commit=${{ github.sha }} \
-            -a "repo=${{ github.repository }}" \
+            -a "repo=${{ secrets.DOCKER_USERNAME }}/nexus0" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/nexus0:v0.8.0-${{ github.run_id }}
+            ${{ secrets.DOCKER_USERNAME }}/nexus0:latest-${{ github.run_id }} && \
+          cosign sign -a commit=${{ github.sha }} \
+            -a "repo=${{ secrets.DOCKER_USERNAME }}/nexus0" \
+            -a "workflow=${{ github.workflow }}" \
+            --key env://COSIGN_PRIVATE_KEY \
+            ${{ secrets.DOCKER_USERNAME }}/nexus0:v1.0.0-${{ github.run_id }}
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}

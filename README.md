@@ -1,21 +1,34 @@
 ### Underground Nexus deployment
-> Current version 0.8.0
+> Current version 1.0.0
+
+To pull the latest Underground Nexus image.
+
+`docker pull pyrrhus/nexus0:latest`
 
 **Resources**
-1. PI-Hole DNS - Obtain the IP address of your running docker container. `docker inspect Underground-Nexus`
-2. Linux webtop desktop - Alpine KDE - `http://localhost:3000` (optionally)
-3. Linux webtop desktop - Ubuntu MATE - `http://localhost:1000`
-4. Kali Linux Bleeding Edge Repository
-5. Portainer CE that sits behind NGINX Reverse Proxy
+1. PI-Hole DNS that sits behind NGINX Reverse Proxy - Obtain the IP address of your running docker container. `docker inspect Underground-Nexus`
+  - There is no password set, so you will have to change it
+    - Access the Docker container once you're within the Underground-Nexus running container.
+      - `docker exec -it Inner-DNS-Control /bin/sh`
+      - `sudo pihole -a -p`
+2. Linux webtop desktop - Alpine KDE - `http://10.20.0.30:3000` (optionally, only accessible from the Ubuntu MATE desktop)
+3. Linux webtop desktop - Ubuntu MATE - `http://172.17.0.4:1000`
+4. Kali Linux Bleeding Edge Repository - not publicly accessible
+5. Portainer CE - `https://172.17.0.4:9443/`
+6. Minio S3 Storage - `http://172.17.0.4:9001/login`
+  - To access Minio S3, this server is deployed with the default credentials: `minioadmin:minioadmin`
+7. Visual Studio Code - `http://10.20.0.73:3000` is not publicly accessible, this can be accessed from Ubuntu MATE desktop.
+8. Kubernetes (k3d) cluster deployed on standby as a load-balancer
 
 **Features that are missing:**
 
 UPDATE: 
+  - Added Visual Studio Code, there were issues with hardware acceleration when it is deployed via ARM64 distro.
   - Minio has been added back again, and the port has been fixed.
-  - There is a bash script now, and I took away the workbench.sh script for now.
-  - Docker Swarm is initialized last at the end of the script.
+  - ~~There is a bash script now, and I took away the workbench.sh script for now.~~ Scratch that, it's added back in the Dockerfile.
+  - Docker Swarm is initialized last at the end of the script to avoid conflicts with existing services.
 
-1. Minio is not being used right now because Minio has a conflicting port 9000 with Portainer. Future plan to redirect port usage or take away port 9000 on Portainer.
+1. ~~Minio is not being used right now because Minio has a conflicting port 9000 with Portainer. Future plan to redirect port usage or take away port 9000 on Portainer.~~
 2. There isn't the best bash script to check for logic on when there are certain resources that are already available. A cli tool is coming soon.
 3. Docker Swarm is not initialized first only because of the conflict that Portainer has while being deployed along with Docker Swarm turned on.
 
@@ -30,15 +43,20 @@ UPDATE:
 
 The default Dockerfile has the original `docker:dind` base image to build the Underground Nexus from. The GitHub Action will build the main Dockerfile with `dagger`. Please note, there are two Dockerfiles. One is using `nestybox/alpine-supervisord-docker:latest` which is an alternate version of Docker-in-Docker (dind).
 
-`dagger do build`
+Before, I had multiple steps to build and load the newly built Docker images. I was able to change the Dagger actions to build with the Dockerfile contents.
 
-Load your newly built docker image on your workstation.
+To start, you will need to set some variables.
 
-`dagger do load`
+```bash
+export REGISTRY_DOCKERIO_USER=<USERNAME>
+export REGISTRY_DOCKERIO_PASS=<PASSWORD>
+```
 
-After the docker image has been built, push it to your favorite registry.
+To build with the latest version or a specific version. Once built, it will push to Dockerhub.
 
-`dagger do push`
+```bash
+dagger do versions <VERSION>
+```
 
 To run with just Docker in `--privileged` mode.
 
@@ -56,6 +74,12 @@ docker run -itd --name=Underground-Nexus \
 Execute the `deploy-olympiad.sh` script
 
 `docker exec Underground-Nexus sh deploy-olympiad.sh`
+
+If you need to troubleshoot or access the running container. Do this below.
+
+`docker exec -it Underground-Nexus /bin/sh`
+
+**Details**
 
 I am using Sigstore Cosign to generate key-pair and sign my docker images with the generated Cosign private key.
 

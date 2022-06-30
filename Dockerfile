@@ -1,8 +1,9 @@
 FROM docker:dind
 
 ARG VERSION
-ENV VERSION $VERSION
 ARG BUILD_TIMESTAMP
+
+ENV VERSION $VERSION
 ENV BUILD_TIMESTAMP $BUILD_TIMESTAMP
 
 LABEL description="Custom Underground Nexus copy-paste script data center deployment."

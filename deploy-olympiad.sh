@@ -256,4 +256,6 @@ k3d cluster create KuberNexus \
     -p 10254:10254@loadbalancer \
     -p 31896:31896@loadbalancer
 
+docker compose -f portainer-deploy.yml up -d
+
 echo "Completed."
