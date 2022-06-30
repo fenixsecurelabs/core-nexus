@@ -46,7 +46,7 @@ jobs:
         with:
           cmds: |
             project update
-            do --plan build-dind.cue versions
+            do --plan build-dind-image.cue versions
 
       # Sign image with cosign
       - name: Sign image
