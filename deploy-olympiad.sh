@@ -81,6 +81,8 @@ fi
 
 echo "Build Olympiad0 Portainer node"
 
+sleep 30
+
 export PORTAINER_NAME=Olympiad0
 
 if docker volume ls | grep -w portainer_data;
