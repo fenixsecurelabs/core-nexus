@@ -36,38 +36,9 @@ else
     docker network create -d bridge --subnet=$SUBNET_NETWORK $DOCKER_NETWORK 2> /dev/null
 fi
 
-echo "Deploy KuberNexus"
-
-# Install Kubernetes on AMD64
-echo "Install Kubectl"
-
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
 sleep 5
 
-wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-
-k3d cluster create KuberNexus \
-    -p 8080:80@loadbalancer \
-    -p 8443:8443@loadbalancer \
-    -p 2222:22@loadbalancer \
-    -p 179:179@loadbalancer \
-    -p 2375:2376@loadbalancer \
-    -p 2378:2379@loadbalancer \
-    -p 2381:2380@loadbalancer \
-    -p 8472:8472@loadbalancer \
-    -p 8843:443@loadbalancer \
-    -p 4789:4789@loadbalancer \
-    -p 9099:9099@loadbalancer \
-    -p 9100:9100@loadbalancer \
-    -p 7443:9443@loadbalancer \
-    -p 9796:9796@loadbalancer \
-    -p 6783:6783@loadbalancer \
-    -p 10250:10250@loadbalancer \
-    -p 10254:10254@loadbalancer \
-    -p 31896:31896@loadbalancer
-
-echo "Deploy Pi-hole DNS server"
+echo "Deploy Pi-Hole DNS Server"
 
 export PIHOLE=Inner-DNS-Control
 export PIHOLE_IPADDRESS=10.20.0.20
@@ -108,7 +79,7 @@ else
         -p 9000:9000 \
         -p 9001:9001 \
         --name=$MINIO_NAME \
-        -h $MINIO_NAME \
+        --hostname $MINIO_NAME \
         --dns=$PIHOLE_IPADDRESS \
         --net=$DOCKER_NETWORK \
         --restart=always \
@@ -129,7 +100,7 @@ else
     docker run \
         -itd -p 8200:1234 \
         --name=$SECRET_VAULT_NAME \
-        -h $SECRET_VAULT_NAME \
+        --hostname $SECRET_VAULT_NAME \
         --dns=$PIHOLE_IPADDRESS \
         --net=$DOCKER_NETWORK \
         --restart=always \
@@ -151,7 +122,7 @@ else
         -itd \
         -p 22:22 \
         --name=$KALI_LINUX_NAME \
-        -h $KALI_LINUX_NAME \
+        --hostname $KALI_LINUX_NAME \
         --dns=$PIHOLE_IPADDRESS \
         --net=$DOCKER_NETWORK \
         --restart=always \
@@ -175,7 +146,7 @@ else
     docker run \
         -itd \
         --name=$WORKBENCH_NAME \
-        -h $WORKBENCH_NAME \
+        --hostname $WORKBENCH_NAME \
         --privileged \
         --init \
         -e PUID=1000 \
@@ -204,7 +175,7 @@ else
     docker run \
         -itd \
         --name=$SOC_NAME \
-        -h $SOC_NAME \
+        --hostname $SOC_NAME \
         --privileged \
         --init \
         -e PUID=2000 \

@@ -7,7 +7,7 @@ services:
     ports:
       - '80:80'
     environment:
-      DEFAULT_HOST: pi.hole.cyberfenix-veritas-labs.io
+      DEFAULT_HOST: pi.hole.home.lan
     volumes:
       - '/var/run/docker.sock:/tmp/docker.sock'
     restart: always
@@ -30,7 +30,7 @@ services:
     environment:
       ServerIP: 10.20.0.20
       PROXY_LOCATION: pihole
-      VIRTUAL_HOST: pi.hole.cyberfenix-veritas-labs.io
+      VIRTUAL_HOST: pi.hole.home.lan
       VIRTUAL_PORT: 80
     restart: always
     networks:

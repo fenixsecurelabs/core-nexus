@@ -18,6 +18,10 @@ RUN apk add bash \
     wget \
     docker-compose
 
+WORKDIR /nexus-bucket
+
+COPY workbench.sh /nexus-bucket/
+
 WORKDIR /
 
 COPY deploy-olympiad.sh /

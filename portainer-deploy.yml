@@ -6,7 +6,6 @@ services:
     image: portainer/portainer-ce:2.14.0
     ports:
       - "9443:9443"
-#      - "9000:9000"
       - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -20,7 +19,6 @@ services:
 
 networks:
   Inner-Athena:
-    external:
       name: Inner-Athena
 
 volumes:
