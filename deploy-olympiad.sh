@@ -9,6 +9,7 @@ export VAULT_IMAGE=vault
 export KALI_LINUX_IMAGE=registry.gitlab.com/cyberphxv/nexus-athena0:latest.amd64
 export WORKBENCH_WEBTOP_IMAGE=pyrrhus/webtop-workbench:amd64-latest
 export SOC_WEBTOP_IMAGE=pyrrhus/soc-admin-webtop:amd64-latest
+export VISUAL_STUDIO_IMAGE=lscr.io/linuxserver/openvscode-server
 
 echo "Creating volumes for persistence..."
 docker volume create pihole_dns_data && \
@@ -216,15 +217,70 @@ else
         -v /nexus-bucket:/config/Desktop/nexus-bucket $SOC_WEBTOP_IMAGE 2> /dev/null
 fi
 
+echo "Install Visual Studio"
+
+export VISUALSTUDIO_NAME=code-server
+
+if docker ps --format "{{.Names}}" | grep -w $VISUALSTUDIO_NAME;
+then
+    echo "Security Operation Center is already created."
+else
+    docker run \
+        -d \
+        --name=$VISUALSTUDIO_NAME \
+        -e PUID=1050 \
+        -e PGID=1050 \
+        -p 18443:3000 \
+        --dns=$PIHOLE_IPADDRESS \
+        --net=$DOCKER_NETWORK \
+        -v /nexus-bucket:/nexus-bucket \
+        -v /nexus-bucket/visual-studio-code:/config \
+        -v /etc/docker:/etc/docker \
+        -v /usr/local/bin/docker:/usr/local/bin/docker \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        --restart unless-stopped $VISUAL_STUDIO_IMAGE 2> /dev/null
+fi
+
 echo "Intiating Docker Swarm"
 
 sleep 3; docker swarm init
 
-wget https://raw.githubusercontent.com/Underground-Ops/underground-nexus/main/Production%20Artifacts/firefox-homepage.sh && \
-    sh firefox-homepage.sh
+wget https://raw.githubusercontent.com/Underground-Ops/underground-nexus/main/Production%20Artifacts/firefox--hostnameomepage.sh && \
+    sh firefox--hostnameomepage.sh
 
 sleep 5
 
-# sh ./nexus-bucket/workbench.sh
+sh ./nexus-bucket/workbench.sh
+
+echo "Deploy KuberNexus"
+
+# Install Kubernetes on AMD64
+echo "Install Kubectl"
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+sleep 5
+
+wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+k3d cluster create KuberNexus \
+    -p 8080:80@loadbalancer \
+    -p 8443:8443@loadbalancer \
+    -p 2222:22@loadbalancer \
+    -p 179:179@loadbalancer \
+    -p 2375:2376@loadbalancer \
+    -p 2378:2379@loadbalancer \
+    -p 2381:2380@loadbalancer \
+    -p 8472:8472@loadbalancer \
+    -p 8843:443@loadbalancer \
+    -p 4789:4789@loadbalancer \
+    -p 9099:9099@loadbalancer \
+    -p 9100:9100@loadbalancer \
+    -p 7443:9443@loadbalancer \
+    -p 9796:9796@loadbalancer \
+    -p 6783:6783@loadbalancer \
+    -p 10250:10250@loadbalancer \
+    -p 10254:10254@loadbalancer \
+    -p 31896:31896@loadbalancer
 
 echo "Completed."
