@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+env:
+  REGISTRY_DOCKERIO_PASS: ${{ secrets.REGISTRY_DOCKERIO_PASS }}
+  REGISTRY_DOCKERIO_USER: ${{ secrets.REGISTRY_DOCKERIO_USER }}
+  
 jobs:
   dagger:
     runs-on: ubuntu-latest
@@ -56,11 +60,11 @@ jobs:
             -a "repo=${{ secrets.DOCKER_USERNAME }}/nexus0" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/nexus0:latest-${{ github.run_id }}-sysbox && \
+            ${{ secrets.DOCKER_USERNAME }}/nexus0:latest-sysbox && \
           cosign sign -a commit=${{ github.sha }} \
             -a "repo=${{ secrets.DOCKER_USERNAME }}/nexus0" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/nexus0:v1.0.0-${{ github.run_id }}-sysbox
+            ${{ secrets.DOCKER_USERNAME }}/nexus0:v1.0.0-sysbox
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
