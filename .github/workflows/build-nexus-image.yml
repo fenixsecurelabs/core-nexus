@@ -1,4 +1,4 @@
-name: nexus
+name: Build Default Nexus Image
 
 on:
   push:
@@ -57,14 +57,14 @@ jobs:
         shell: bash
         run: |
           cosign sign -a commit=${{ github.sha }} \
-            -a "repo=${{ secrets.DOCKER_USERNAME }}/nexus0" \
+            -a "repo=${{ secrets.DOCKER_USERNAME }}/core-nexus" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/nexus0:latest && \
+            ${{ secrets.DOCKER_USERNAME }}/core-nexus:latest && \
           cosign sign -a commit=${{ github.sha }} \
-            -a "repo=${{ secrets.DOCKER_USERNAME }}/nexus0" \
+            -a "repo=${{ secrets.DOCKER_USERNAME }}/core-nexus" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/nexus0:v1.0.0
+            ${{ secrets.DOCKER_USERNAME }}/core-nexus:v1.1.0
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
