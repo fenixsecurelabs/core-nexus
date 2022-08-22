@@ -29,12 +29,13 @@ dagger.#Plan & {
 	client: filesystem: ".": read: contents: dagger.#FS
 	client: env: {
 		REGISTRY_DOCKERIO_USER: string | "_token_"
+		OFFICIAL_REGISTRY_USER: string | *"_token_"
 		REGISTRY_DOCKERIO_PASS: dagger.#Secret
 	}
 
 	actions: versions: {
 		latest:   _
-		"v1.0.0": _
+		"v1.1.0": _
 		[tag=string]: {
 			build: #DindBuild & {
 				source: client.filesystem.".".read.contents
@@ -45,7 +46,7 @@ dagger.#Plan & {
 			}
 			push: _op: docker.#Push & {
 				image: build.output
-				dest:  "\(client.env.REGISTRY_DOCKERIO_USER)/nexus0:\(tag)"
+				dest:  "\(client.env.OFFICIAL_REGISTRY_USER)/core-nexus:\(tag)"
 			}
 		}
 	}

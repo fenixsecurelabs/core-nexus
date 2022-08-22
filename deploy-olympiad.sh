@@ -6,9 +6,9 @@ export PIHOLE_IMAGE=pihole/pihole:latest
 export PORTAINER_IMAGE=portainer/portainer-ce:2.14.0
 export MINIO_IMAGE=quay.io/minio/minio
 export VAULT_IMAGE=vault
-export KALI_LINUX_IMAGE=registry.gitlab.com/cyberphxv/nexus-athena0:latest.amd64
-export WORKBENCH_WEBTOP_IMAGE=pyrrhus/webtop-workbench:amd64-latest
-export SOC_WEBTOP_IMAGE=pyrrhus/soc-admin-webtop:amd64-latest
+export KALI_LINUX_IMAGE=phoenixvlabs/nexus-athena:latest
+export WORKBENCH_WEBTOP_IMAGEphoenixvlabs/nexus-webtop-workbench:amd64-latest
+export SOC_WEBTOP_IMAGE=phoenixvlabs/nexus-webtop-soc:amd64-latest
 export VISUAL_STUDIO_IMAGE=lscr.io/linuxserver/openvscode-server
 
 echo "Creating volumes for persistence..."
@@ -138,6 +138,7 @@ echo "Build Workbench"
 sleep 5
 
 export WORKBENCH_NAME=workbench
+export TZONE=America/Chicago
 
 if docker ps --format "{{.Names}}" | grep -w $WORKBENCH_NAME;
 then
@@ -151,7 +152,7 @@ else
         --init \
         -e PUID=1000 \
         -e PGID=1000 \
-        -e TZ=America/Chicago \
+        -e TZ=$TZONE \
         -p 1000:3000 \
         --dns=$PIHOLE_IPADDRESS \
         --net=$DOCKER_NETWORK \
@@ -167,6 +168,7 @@ sleep 5
 
 export SOC_NAME=Security-Operation-Center
 export SOC_IPADDRESS=10.20.0.30
+export TZONE=America/Chicago
 
 if docker ps --format "{{.Names}}" | grep -w $SOC_NAME;
 then
@@ -180,7 +182,7 @@ else
         --init \
         -e PUID=2000 \
         -e PGID=2000 \
-        -e TZ=America/Chicago \
+        -e TZ=$TZONE \
         -p 2000:3000 \
         --dns=$PIHOLE_IPADDRESS \
         --net=$DOCKER_NETWORK \

@@ -29,6 +29,7 @@ dagger.#Plan & {
 	client: filesystem: ".": read: contents: dagger.#FS
 	client: env: {
 		REGISTRY_DOCKERIO_USER: string | *"_token_"
+		OFFICIAL_REGISTRY_USER: string | *"_token_"
 		REGISTRY_DOCKERIO_PASS: dagger.#Secret
 	}
 
@@ -45,7 +46,7 @@ dagger.#Plan & {
 			}
 			push: _op: docker.#Push & {
 				image: build.output
-				dest:  "\(client.env.REGISTRY_DOCKERIO_USER)/nexus0:\(tag)-sysbox"
+				dest:  "\(client.env.REGISTRY_DOCKERIO_USER)/core-nexus:\(tag)-sysbox"
 			}
 		}
 	}
