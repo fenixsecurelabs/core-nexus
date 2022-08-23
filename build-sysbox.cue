@@ -35,7 +35,7 @@ dagger.#Plan & {
 
 	actions: versions: {
 		latest:   _
-		"v1.0.0": _
+		"v1.2.6": _
 		[tag=string]: {
 			build: #SysboxBuild & {
 				source: client.filesystem.".".read.contents

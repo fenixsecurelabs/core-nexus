@@ -7,7 +7,7 @@ export PORTAINER_IMAGE=portainer/portainer-ce:2.14.0
 export MINIO_IMAGE=quay.io/minio/minio
 export VAULT_IMAGE=vault
 export KALI_LINUX_IMAGE=phoenixvlabs/nexus-athena:latest
-export WORKBENCH_WEBTOP_IMAGEphoenixvlabs/nexus-webtop-workbench:amd64-latest
+export WORKBENCH_WEBTOP_IMAGE=phoenixvlabs/nexus-webtop-workbench:amd64-latest
 export SOC_WEBTOP_IMAGE=phoenixvlabs/nexus-webtop-soc:amd64-latest
 export VISUAL_STUDIO_IMAGE=lscr.io/linuxserver/openvscode-server
 
@@ -218,10 +218,12 @@ fi
 
 echo "Intiating Docker Swarm"
 
-sleep 3; docker swarm init
+sleep 3; docker swarm init; echo y | docker network rm ingress
 
-wget https://raw.githubusercontent.com/Underground-Ops/underground-nexus/main/Production%20Artifacts/firefox--hostnameomepage.sh && \
-    sh firefox--hostnameomepage.sh
+sleep 5; docker network create --opt encrypted --driver overlay ingress
+
+wget https://raw.githubusercontent.com/acald-creator/underground-nexus/main/Production%20Artifacts/firefox-homepage.sh && \
+    sh firefox-homepage.sh
 
 sleep 5
 
