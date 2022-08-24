@@ -149,7 +149,6 @@ else
         --name=$WORKBENCH_NAME \
         --hostname $WORKBENCH_NAME \
         --privileged \
-        --init \
         -e PUID=1000 \
         -e PGID=1000 \
         -e TZ=$TZONE \
@@ -179,7 +178,6 @@ else
         --name=$SOC_NAME \
         --hostname $SOC_NAME \
         --privileged \
-        --init \
         -e PUID=2000 \
         -e PGID=2000 \
         -e TZ=$TZONE \
