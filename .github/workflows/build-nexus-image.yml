@@ -1,6 +1,18 @@
 name: Build Default Nexus Image
 
 on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      tag:
+        type: string
+      secrets:
+        registry_username:
+          required: true
+        registry_password:
+          required: true
   push:
     branches:
       - main
@@ -8,19 +20,20 @@ on:
 env:
   REGISTRY_DOCKERIO_PASS: ${{ secrets.REGISTRY_DOCKERIO_PASS }}
   REGISTRY_DOCKERIO_USER: ${{ secrets.REGISTRY_DOCKERIO_USER }}
+  TAG: latest
 
 jobs:
   dagger:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Install Golang and check version
       - name: Install go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18.3
+          go-version: 1.19.4
           check-latest: true
 
       # Install cosign and check version
@@ -56,15 +69,16 @@ jobs:
       - name: Sign image
         shell: bash
         run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           cosign sign -a commit=${{ github.sha }} \
             -a "repo=${{ secrets.DOCKER_USERNAME }}/core-nexus" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/core-nexus:latest && \
+            ${{ secrets.DOCKER_USERNAME }}/core-nexus:$VERSION && \
           cosign sign -a commit=${{ github.sha }} \
             -a "repo=${{ secrets.DOCKER_USERNAME }}/core-nexus" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/core-nexus:v1.1.0
+            ${{ secrets.DOCKER_USERNAME }}/core-nexus:${{ env.TAG }}
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}

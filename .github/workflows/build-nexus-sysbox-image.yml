@@ -8,13 +8,14 @@ on:
 env:
   REGISTRY_DOCKERIO_PASS: ${{ secrets.REGISTRY_DOCKERIO_PASS }}
   REGISTRY_DOCKERIO_USER: ${{ secrets.REGISTRY_DOCKERIO_USER }}
-  
+  TAG: latest
+
 jobs:
   dagger:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Install Golang and check version
       - name: Install go
@@ -56,15 +57,16 @@ jobs:
       - name: Sign image
         shell: bash
         run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           cosign sign -a commit=${{ github.sha }} \
             -a "repo=${{ secrets.DOCKER_USERNAME }}/core-nexus" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/core-nexus:latest-sysbox && \
+            ${{ secrets.DOCKER_USERNAME }}/core-nexus:$VERSION-sysbox && \
           cosign sign -a commit=${{ github.sha }} \
             -a "repo=${{ secrets.DOCKER_USERNAME }}/core-nexus" \
             -a "workflow=${{ github.workflow }}" \
             --key env://COSIGN_PRIVATE_KEY \
-            ${{ secrets.DOCKER_USERNAME }}/core-nexus:v1.1.0-sysbox
+            ${{ secrets.DOCKER_USERNAME }}/core-nexus:${{ env.TAG }}-sysbox
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
